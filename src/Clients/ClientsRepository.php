@@ -12,19 +12,19 @@ class ClientsRepository
     }
     public function add(Clients $client)
     {
-        $prep=$this->connection->prepare('INSERT INTO clients (ncompte,nom,prenom,date_naissance,adresse,cp,pays) VALUES (:ncompte,:nom,:prenom,:date_naissance,:adresse,:cp,:pays)');
-        $prep->bindValue(':ncompte',$client->getNCompte(),PDO::PARAM_INT);
+        $prep=$this->connection->prepare('INSERT INTO clients (ncompte,nom,prenom,datenaissance,adresse,cp,pays) VALUES (:ncompte,:nom,:prenom,:datenaissance,:adresse,:cp,:pays)');
+        $prep->bindValue(':ncompte',$client->getNcompte(),\PDO::PARAM_INT);
         $prep->bindValue(':nom',$client->getNom());
         $prep->bindValue(':prenom',$client->getPrenom());
-        $prep->bindValue(':date_naissance',$client->getDateNaissance());
+        $prep->bindValue(':datenaissance',$client->getDatenaissance());
         $prep->bindValue(':adresse',$client->getAdresse());
         $prep->bindValue(':cp',$client->getCp());
         $prep->bindValue(':pays',$client->getPays());
-        $prep->execute();
+        return $prep->execute();
     }
-    public function delete(Clients $client)
+    public function delete($client)
     {
-        $this->connection->exec('delete from clients where ncompte='.$client->getNCompte());
+        return $this->connection->exec('delete from clients where ncompte='.$client);
     }
     public function update(Clients $client)
     {
@@ -43,18 +43,36 @@ class ClientsRepository
     public function allClient()
     {
         $clients=[];
-        $req=$this->connection->query('select ncompte,nom,prenom,date_naissance,adresse,cp,pays from clients order by ncompte');
-        while($clt=$req->fetch(PDO::FETCH_ASSOC))
+        $req=$this->connection->query('select ncompte,nom,prenom,datenaissance,adresse,cp,pays from clients order by ncompte');
+        while($clt=$req->fetch(\PDO::FETCH_ASSOC))
         {
-            $clients[]=new Clients($clt);
+            $client = new Clients();
+            $client->setNcompte($clt["ncompte"]);
+            $client->setNom($clt["nom"]);
+            $client->setPrenom($clt["prenom"]);
+            $client->setDatenaissance($clt["datenaissance"]);
+            $client->setAdresse($clt["adresse"]);
+            $client->setCp($clt["cp"]);
+            $client->setPays($clt["pays"]);
+            $clients[]=$client;
         }
         return $clients;
     }
     public function getCompte($ncompte)
     {
-        $id = (int) $ncompte;
-        $req = $this->connection->query('SELECT ncompte,nom,prenom,date_naissance,adresse,cp,pays FROM clients WHERE ncompte = '.$id);
-        $donnees = $req->fetch(PDO::FETCH_ASSOC);
-        return new Clients($donnees);
+        $req = $this->connection->query('SELECT ncompte,nom,prenom,datenaissance,adresse,cp,pays FROM clients natural join compte WHERE nomcompte =\''.$ncompte.'\'');
+        if($req) {
+            $donnees = $req->fetch(\PDO::FETCH_ASSOC);
+            if($donnees) {
+                $client = new Clients();
+                $client->setNom($donnees["nom"]);
+                $client->setPrenom($donnees["prenom"]);
+                $client->setDatenaissance($donnees["datenaissance"]);
+                $client->setAdresse($donnees["adresse"]);
+                $client->setCp($donnees["cp"]);
+                $client->setPays($donnees["pays"]);
+                return $client;
+            }else return false;
+        }else return false;
 }
 }

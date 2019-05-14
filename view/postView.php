@@ -10,7 +10,7 @@
 <p>retourner a la page principal</p>
 <?php
 if(isset($_GET['titre']))echo ' le film : '.$_GET['titre'].': a été ajouter';
-else if(isset($_GET['action'])) echo "le film hhhh : ".$film['titre'];
+else if(isset($_GET['action'])&& $_GET['action']=='afficher') echo "le film hhhh : ".$film['titre'];
 else echo $_GET['id'].' :::: '.$commentaire;
 
     ?>
